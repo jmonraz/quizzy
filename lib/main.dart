@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
+import 'quizbrain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
+QuizBrain quizBrain = new QuizBrain();
 
 void main() {
   runApp(const MyApp());
@@ -27,6 +30,43 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  List<Icon> scoreKeeper = [];
+
+  // List<String> questions = [
+  //   'You can lead a cow down stairs but not up stairs.',
+  //   'Approximately one quarter of human bones are in the feet.',
+  //   'A slug\'s blood is green.'
+  // ];
+  //
+  // List<bool> answers = [false, true, true];
+
+  void checkAnswer(bool userCheckedAnswer) {
+    setState(() {
+      if (scoreKeeper.length == quizBrain.getQuestionBankLength()) {
+        Alert(
+                context: context,
+                title: 'QUIZ COMPLETED',
+                desc: 'You have successfully completed the quiz.')
+            .show();
+        quizBrain.resetQuiz();
+        scoreKeeper.clear();
+      } else {
+        if (!(userCheckedAnswer == quizBrain.getQuestionAnswer())) {
+          scoreKeeper.add(Icon(
+            Icons.close,
+            color: Colors.red,
+          ));
+        } else {
+          scoreKeeper.add(Icon(
+            Icons.check,
+            color: Colors.green,
+          ));
+        }
+        quizBrain.nextQuestion();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +84,7 @@ class _HomeState extends State<Home> {
                   padding: EdgeInsets.all(10),
                   child: Center(
                     child: Text(
-                      'This is where the question text will go.',
+                      quizBrain.getQuestionText(),
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 25, color: Colors.white),
                     ),
@@ -57,11 +97,13 @@ class _HomeState extends State<Home> {
                   child: Container(
                     color: Colors.green,
                     child: TextButton(
-                      child: Text(
+                      child: const Text(
                         'True',
                         style: TextStyle(color: Colors.white, fontSize: 20),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        checkAnswer(true);
+                      },
                     ),
                   ),
                 ),
@@ -72,14 +114,18 @@ class _HomeState extends State<Home> {
                   child: Container(
                     color: Colors.red,
                     child: TextButton(
-                      child: Text(
-                        'False',
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      ),
-                      onPressed: () {},
-                    ),
+                        child: const Text(
+                          'False',
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                        onPressed: () {
+                          checkAnswer(false);
+                        }),
                   ),
                 ),
+              ),
+              Row(
+                children: scoreKeeper,
               )
             ],
           ),
